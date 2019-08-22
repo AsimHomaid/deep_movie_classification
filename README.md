@@ -1,59 +1,41 @@
-# Proposal
+---
+title: 'Deep Movie Classification'
+---
 
-Train a neural network on a dataset of 5000 movie trailers. And build a model to make a prediction on the movie genre, based on the prevoius 5k genre-labled dataset.
-
-# dataset
-use: https://www.kaggle.com/carolzhangdc/imdb-5000-movie-dataset
-a csv cointaining 5k movie metadata. With the following features:
-color
-director_nameName of the Director of the Movie
-num_critic_for_reviews
-duration
-director_facebook_likes
-actor_3_facebook_likes
-actor_2_name
-actor_1_facebook_likesNumber of likes of the Actor_1 on his/her Facebook Page
-gross
-genres
-actor_1_namePrimary actor starring in the movie
-movie_title
-num_voted_users
-cast_total_facebook_likes
-actor_3_name
-facenumber_in_poster
-plot_keywords
-movie_imdb_link
-num_user_for_reviews
-language
-country
-content_rating
-budget
-title_year
-actor_2_facebook_likes
-imdb_score
-aspect_ratio
-movie_facebook_likes
-
-# feature creation
-Given a metadata csv. What is still missing is the trailer content.
-In this case, what could be done is to create a webscraper that works as follows:
-
-- youtube search "data['title'] + 'trailer'"
-- click on first video
-- add link of the trailer to the movie row, in a new column named 'trailer'
-
-# NN training
- [nn training]
- 
-# storage
-given the large dataset, using `youtube-dl` to download the videos. They have to be stored in the cloud.
-Very likley using mongodb, in the form of a single collection of documents. Where each movie is stored as {'title': trailer_file}
-
-# user facing product
-the model should be presented as a single page website. Where the user inputs a youtube link to a movie trailer. And the trained model tries to predict the genre of the trailer, printed out in a text box.
+Deep Movie Classification
+===
 
 
-# more than genre:
-given that we have also a list of actors, 3 in each movie row. If given enough time, a possible method to add would be a prediction of actors showing in the trailer.
+## Table of Contents
 
-This of course is with the assumption that our neural network would be sufficient to notice that the same featur of 'actor' keeps showing up in Batman1, Batman2, Batman3. Without the need to point to a face. What is need is to detect that the actor is 'somewhere there' in the trailer, without needing to actually print or point out the face of the actor.
+[TOC]
+
+## Intro
+
+Movie genres do not have a formal definition, but are rather based on human intiution. With a lack of any objective or formal method to label, genres become one of the more vague elements for a computer to grasp.
+
+This project is a attempt to use a neural network to make accurate predictions on a movie genre when given a video trailer. By training it on roughly 4000 movie trailers labeled by genre.
+
+Project Pipeline
+---
+* User inputs Youtube link for a movie trailer
+* Download trailer on local disk
+* Turn video file into a set of image frames, 1 frame for each second
+* Store .png files as 3D numpy arrays shaped as [299, 299, 3]
+* Exract deep features from a frame buy running it into a pre-trained Inception-V3 neural network.
+* Use the output of 2048 deep features to make a prediction on movie genre using a random forest.
+
+
+
+User Guide
+---
+* `movie_metadata.csv`: original file containing movie titles and labels found on [Kaggle](https://www.kaggle.com/carolzhangdc/imdb-5000-movie-dataset)
+* `trailer_source.csv`: file with all links for trailers to download(total size is around 100gb)
+* `movie_genre_matrix.csv`: one hot encoded gneres and movie titles
+* `extract_deep_features_store_db.ipynb`: notebook with instruction to extract deep featurs and store them in mongo db for later use
+* `build_and_export_model.ipynb`: notebook on how to build a random forest and pickle it to use for production pipeline
+* `ffmpeg.py`: python script that takes all videos downlaoded and exports them into .png frames in order. movie_title_n.png
+* `deployement.py`: production pipeline. Takes youtube link as std-in and prints out top 3 genres.
+
+## Model Improvements
+replace neural network with either a recurrent neural network, or residual neural network. Currently, the model only works on single frames without context, as a result, accuracy isn't where it should be. So far the model makes predictions based on object recognition on a frame by frame bases. Further work is needed to make a neural network comprehend a video.
