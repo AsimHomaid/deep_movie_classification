@@ -1,6 +1,4 @@
----
-title: 'Deep Movie Classification'
----
+
 
 Deep Movie Classification
 ===
